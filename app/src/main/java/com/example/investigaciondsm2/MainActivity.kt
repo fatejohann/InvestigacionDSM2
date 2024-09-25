@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
                             Toast.makeText(this@MainActivity, "api conectada: codigo 200", Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        // mostrar mensaje según el codigo
+                        // mostrar mensaje segun el codigo
                         runOnUiThread {
                             when (response.code()) {
                                 400 -> Toast.makeText(this@MainActivity, "Error: Solicitud incorrecta (400)", Toast.LENGTH_LONG).show()
