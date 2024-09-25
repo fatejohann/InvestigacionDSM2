@@ -41,13 +41,22 @@ class MainActivity : AppCompatActivity() {
                     val response: Response<List<Photo>> = apiService.getPhotos()
                     if (response.isSuccessful) {
                         val photos = response.body() ?: emptyList()
+
                         runOnUiThread {
                             photoAdapter = PhotoAdapter(photos)
                             recyclerView.adapter = photoAdapter
+
+                            //  mensaje (200)
+                            Toast.makeText(this@MainActivity, "api conectada: codigo 200", Toast.LENGTH_LONG).show()
                         }
                     } else {
+                        // mostrar mensaje según el codigo
                         runOnUiThread {
-                            Toast.makeText(this@MainActivity, "Error en la respuesta", Toast.LENGTH_LONG).show()
+                            when (response.code()) {
+                                400 -> Toast.makeText(this@MainActivity, "Error: Solicitud incorrecta (400)", Toast.LENGTH_LONG).show()
+                                500 -> Toast.makeText(this@MainActivity, "Error: Error del servidor (500)", Toast.LENGTH_LONG).show()
+                                else -> Toast.makeText(this@MainActivity, "Error: Código ${response.code()}", Toast.LENGTH_LONG).show()
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -61,8 +70,9 @@ class MainActivity : AppCompatActivity() {
         // Cargar las fotos al iniciar
         fetchPhotos()
 
-        // Refrescar las fotos al hacer clic en el botón
+        // Refrescar las fotos al hacer clic en el botón y mostrar mensajes de estado
         refreshButton.setOnClickListener {
+            Toast.makeText(this, "Intentando conectar con la API...", Toast.LENGTH_SHORT).show()
             fetchPhotos()
         }
     }

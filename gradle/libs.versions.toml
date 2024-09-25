@@ -10,8 +10,8 @@ appcompat = "1.7.0"
 material = "1.12.0"
 activity = "1.9.2"
 constraintlayout = "2.1.4"
-retrofit = "2.11.0"
-converterGson = "2.11.0"
+retrofit = "2.9.0"
+converterGson = "2.9.0"
 kotlinxCoroutinesCore = "1.7.3"
 
 [libraries]
