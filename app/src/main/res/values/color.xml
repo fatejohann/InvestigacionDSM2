@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="backgroundColor">#F5F5F5</color>
+    <color name="buttonColor">#FFC71D</color>
+    <color name="recyclerBackground">#FFFFFF</color>
+    <color name="white">#FFFFFF</color>
+
+
+</resources>
