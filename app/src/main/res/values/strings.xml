@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">InvestigacionDSM2</string>
+    <string name="titulo_de_la_foto">Título de la foto</string>
+    <string name="url_de_la_foto">URL de la foto</string>
+    <string name="subir_foto">Subir Foto</string>
+    <string name="refrescar">Refrescar</string>
+    <string name="buscar">buscar</string>
+    <string name="buscar_por_titulo_o_url">buscar por url o titulo</string>
 </resources>

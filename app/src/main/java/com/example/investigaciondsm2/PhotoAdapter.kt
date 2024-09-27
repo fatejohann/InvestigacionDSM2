@@ -6,8 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-
-class PhotoAdapter(private val photos: List<Photo>) : RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
+class PhotoAdapter(var photos: List<Photo>) : RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_photo, parent, false)
@@ -24,11 +23,22 @@ class PhotoAdapter(private val photos: List<Photo>) : RecyclerView.Adapter<Photo
         return photos.size
     }
 
+    // Método para actualizar la lista de fotos
+    fun updatePhotos(newPhotos: List<Photo>) {
+        photos = newPhotos
+        notifyDataSetChanged()
+    }
+
+
+
+
     class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
         val thumbnailImageView: ImageView = itemView.findViewById(R.id.thumbnailImageView)
     }
 }
+
+
 
 data class Photo(
     val albumId: Int,

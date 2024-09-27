@@ -2,6 +2,7 @@ package com.example.investigaciondsm2
 
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var photoAdapter: PhotoAdapter
     private lateinit var refreshButton: Button
+    private lateinit var postPhotoButton: Button
+    private lateinit var photoTitleEditText: EditText
+    private lateinit var photoUrlEditText: EditText
+    private lateinit var searchPhotoEditText: EditText
+    private lateinit var searchButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +31,11 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerView)
         refreshButton = findViewById(R.id.refreshButton)
+        postPhotoButton = findViewById(R.id.postPhotoButton)
+        searchPhotoEditText = findViewById(R.id.searchPhotoEditText)
+        searchButton = findViewById(R.id.searchButton)
+        photoTitleEditText = findViewById(R.id.photoTitle)
+        photoUrlEditText = findViewById(R.id.photoUrl)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         val retrofit = Retrofit.Builder()
@@ -34,29 +45,20 @@ class MainActivity : AppCompatActivity() {
 
         val apiService = retrofit.create(ApiService::class.java)
 
-        // Método para obtener las fotos
+        // Método para obtener fotos
         fun fetchPhotos() {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val response: Response<List<Photo>> = apiService.getPhotos()
                     if (response.isSuccessful) {
                         val photos = response.body() ?: emptyList()
-
                         runOnUiThread {
                             photoAdapter = PhotoAdapter(photos)
                             recyclerView.adapter = photoAdapter
-
-                            //  mensaje (200)
-                            Toast.makeText(this@MainActivity, "api conectada: codigo 200", Toast.LENGTH_LONG).show()
                         }
                     } else {
-                        // mostrar mensaje segun el codigo
                         runOnUiThread {
-                            when (response.code()) {
-                                400 -> Toast.makeText(this@MainActivity, "Error: Solicitud incorrecta (400)", Toast.LENGTH_LONG).show()
-                                500 -> Toast.makeText(this@MainActivity, "Error: Error del servidor (500)", Toast.LENGTH_LONG).show()
-                                else -> Toast.makeText(this@MainActivity, "Error: Código ${response.code()}", Toast.LENGTH_LONG).show()
-                            }
+                            Toast.makeText(this@MainActivity, "Error en la respuesta", Toast.LENGTH_LONG).show()
                         }
                     }
                 } catch (e: Exception) {
@@ -67,13 +69,84 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // Método para postear una nueva foto
+        fun postPhoto(photo: Photo) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response: Response<Photo> = apiService.postPhoto(photo)
+                    if (response.isSuccessful) {
+                        val newPhoto = response.body()
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "Foto subida exitosamente", Toast.LENGTH_LONG).show()
+
+                            // Agregar la nueva foto a la lista local si es necesario
+                            if (newPhoto != null) {
+                                val updatedPhotos = photoAdapter.photos.toMutableList()
+                                updatedPhotos.add(newPhoto)
+                                photoAdapter.updatePhotos(updatedPhotos)
+
+                                findUploadedPhotoByTitleOrUrl(newPhoto.title, newPhoto.url)
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "Error al subir la foto", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "Error en la conexión: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
+        // Método para buscar una foto por título o URL
+        searchButton.setOnClickListener {
+            val searchQuery = searchPhotoEditText.text.toString()
+            if (searchQuery.isNotBlank()) {
+                findUploadedPhotoByTitleOrUrl(searchQuery, searchQuery)
+            } else {
+                Toast.makeText(this, "Por favor, introduce un título o URL para buscar", Toast.LENGTH_LONG).show()
+            }
+        }
+
+
         // Cargar las fotos al iniciar
         fetchPhotos()
 
-        // Refrescar las fotos al hacer clic en el botón y mostrar mensajes de estado
+        // Botón para refrescar fotos
         refreshButton.setOnClickListener {
-            Toast.makeText(this, "Intentando conectar con la API...", Toast.LENGTH_SHORT).show()
             fetchPhotos()
+        }
+
+        // Botón para postear una nueva foto
+        postPhotoButton.setOnClickListener {
+            val title = photoTitleEditText.text.toString()
+            val url = photoUrlEditText.text.toString()
+
+            if (title.isNotBlank() && url.isNotBlank()) {
+                val newPhoto = Photo(
+                    albumId = 1,  // Puedes usar un ID fijo o generar uno
+                    id = 0,  // El servidor normalmente asigna el ID
+                    title = title,
+                    url = url,
+                    thumbnailUrl = url
+                )
+                postPhoto(newPhoto)
+            } else {
+                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    // Método para buscar por título o URL
+    fun findUploadedPhotoByTitleOrUrl(title: String, url: String) {
+        val uploadedPhoto = photoAdapter.photos.find { it.title == title || it.url == url }
+        if (uploadedPhoto != null) {
+            Toast.makeText(this, "Foto encontrada: ${uploadedPhoto.title}", Toast.LENGTH_LONG).show()
+            // Aquí puedes hacer algo como navegar a una vista detallada
+        } else {
+            Toast.makeText(this, "No se encontró la foto", Toast.LENGTH_LONG).show()
         }
     }
 }
